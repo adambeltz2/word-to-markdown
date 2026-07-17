@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word (.docx) to Markdown Converter V2</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    
+    <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+    <script src="https://unpkg.com/turndown-plugin-gfm/dist/turndown-plugin-gfm.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <div class="container mx-auto max-w-4xl p-6 flex-grow">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-extrabold text-blue-600 mb-2">Word to Markdown Converter V2</h1>
+            <p class="text-gray-600">Powered by Mammoth & Turndown.js for high-fidelity conversion.</p>
+        </header>
+
+        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Upload your Word Document (.docx)</label>
+                <div class="flex items-center justify-center w-full">
+                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                            </svg>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                        </div>
+                        <input id="file-upload" type="file" accept=".docx" class="hidden" />
+                    </label>
+                </div>
+                <div id="file-info" class="text-sm text-gray-600 mt-2 hidden font-medium"></div>
+            </div>
+
+            <button id="convert-btn" disabled class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:bg-gray-300 disabled:cursor-not-allowed shadow-md mb-6">
+                Convert Document
+            </button>
+
+            <div id="output-area" class="hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-sm font-semibold text-gray-700">Generated Markdown</label>
+                    <button id="copy-btn" class="bg-gray-800 hover:bg-gray-900 text-white text-xs font-bold py-1.5 px-3 rounded transition flex items-center gap-1">
+                        Copy Code
+                    </button>
+                </div>
+                <textarea id="markdown-output" rows="16" readonly class="w-full p-4 bg-gray-900 text-gray-100 font-mono text-sm rounded-lg border border-gray-700 focus:outline-none resize-y"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let arrayBufferData = null;
+
+        const fileUpload = document.getElementById('file-upload');
+        const fileInfo = document.getElementById('file-info');
+        const convertBtn = document.getElementById('convert-btn');
+        const outputArea = document.getElementById('output-area');
+        const markdownOutput = document.getElementById('markdown-output');
+        const copyBtn = document.getElementById('copy-btn');
+
+        // Initialize Turndown Service with GitHub Flavored Markdown (for Tables/Strikethrough)
+        const turndownService = new TurndownService({
+            headingStyle: 'atx',
+            hr: '---',
+            bulletListMarker: '-',
+            codeBlockStyle: 'fenced'
+        });
+        const gfm = turndownPluginGfm.gfm;
+        turndownService.use(gfm);
+
+        fileUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            fileInfo.textContent = `📄 Selected: ${file.name}`;
+            fileInfo.classList.remove('hidden');
+            convertBtn.disabled = false;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                arrayBufferData = event.target.result;
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        convertBtn.addEventListener('click', function() {
+            if (!arrayBufferData) return;
+
+            // 1. Mammoth converts Word binary to structural HTML
+            mammoth.convertToHtml({ arrayBuffer: arrayBufferData })
+                .then(function(result) {
+                    let htmlResult = result.value; 
+                    
+                    // 2. Turndown handles the complex logic of parsing HTML to Markdown
+                    const markdownText = turndownService.turndown(htmlResult);
+                    
+                    markdownOutput.value = markdownText;
+                    outputArea.classList.remove('hidden');
+                    outputArea.scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(function(err) {
+                    alert("Error parsing document: " + err.message);
+                });
+        });
+
+        copyBtn.addEventListener('click', function() {
+            markdownOutput.select();
+            navigator.clipboard.writeText(markdownOutput.value);
+            
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.replace('bg-gray-800', 'bg-green-600');
+            
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.classList.replace('bg-green-600', 'bg-gray-800');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
