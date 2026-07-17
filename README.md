@@ -1,6 +1,10 @@
 # Word (.docx) to Markdown Converter 📝➡️💻
 
-A lightning-fast, **100% client-side** web application that instantly converts Microsoft Word documents (`.docx`) into clean, formatting-rich Markdown. 
+A lightning-fast, **100% client-side** web application that instantly converts Microsoft Word documents (`.docx`) into clean, formatting-rich Markdown.
+
+🚀 **[Click Here to Use the Live App Now!](https://adambeltz2.github.io/word-to-markdown/)**
+
+---
 
 Built for developers, technical writers, and note-takers who want to move content from Word into repositories, Obsidian, Notion, or static site generators without losing their formatting.
 
@@ -14,7 +18,7 @@ Built for developers, technical writers, and note-takers who want to move conten
 
 ## 🚀 How to Use
 
-1. Navigate to the live application.
+1. Navigate to the [Live Link](https://adambeltz2.github.io/word-to-markdown/).
 2. Click the upload area or **drag and drop** your `.docx` file into the box.
 3. Click the **Convert Document** button.
 4. Your Markdown will instantly generate in the output box below.
@@ -37,7 +41,6 @@ Because this is a static, client-side application, hosting it is incredibly easy
 3. Select **Pages** from the left sidebar.
 4. Under *Build and deployment*, set the Source to **Deploy from a branch**.
 5. Select the `main` branch and click **Save**.
-6. Your app will be live at `https://[your-username].github.io/[repo-name]/` within minutes!
 
 ## 📜 License
 
